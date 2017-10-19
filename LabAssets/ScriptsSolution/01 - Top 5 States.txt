@@ -1,0 +1,5 @@
+flightPerf.filter(flightPerf.YEAR == 2016)\
+.groupBy("DEST_STATE_NM")\
+.count()\
+.orderBy("count",ascending=False)\
+.show(5)

@@ -1,0 +1,12 @@
+# Register a temp table with the count by state and month
+flightPerf.groupBy("YEAR","MONTH","DEST_STATE_NM")\
+.count().registerTempTable("flightMonthTable")
+
+# Calculate the difference in % and order descending
+%%sql
+SELECT DEST_STATE_NM,(MAX(count) - MIN(count))/MAX(count) as Diff_Pct
+FROM flightMonthTable 
+WHERE YEAR = 2016
+GROUP BY DEST_STATE_NM
+ORDER BY 2 DESC
+LIMIT 10

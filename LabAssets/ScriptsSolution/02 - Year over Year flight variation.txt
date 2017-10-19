@@ -1,0 +1,38 @@
+#A first step could be to generate a new Dataframe, with only the subset of data that we need.
+# "col()" function, from pyspark.sql.functions is needed in order to rename the output column of our aggregate in the same operation
+
+from pyspark.sql.functions import *
+
+arrStateFlight = flightPerf \
+			.filter("YEAR in (2014,2015,2016) AND DEST_STATE_NM IN ('California','Texas','Florida','Illinois','Georgia')") \
+			.groupBy("YEAR","DEST_STATE_NM") \
+			.count() \
+			.select( flightPerf.YEAR.alias('Year') \
+					,flightPerf.DEST_STATE_NM.alias('State') \
+					,col("count").alias('NbrFlights'))
+
+					
+#Verify the content of our new dataframe arrStateFlight:
+arrStateFlight.show()
+					
+#Then we register our dataframe as a temp table, 
+arrStateFlight.registerTempTable("arrStateFlightTable")
+
+#Verify the content of the new table:
+%%sql
+SELECT * FROM arrStateFlightTable ORDER BY State,Year
+
+#Then we can finalize our analysis in SQL, 
+#giving us more flexibility with advance functions (window functions for example)
+%%sql
+SELECT Year,State,NbrFlights,(NbrFlights-prev_NbrFlights)/prev_NbrFlights*100 as prevYear_Var
+FROM (
+	SELECT 
+	 Year
+	,State
+	,NbrFlights
+	,LAG(NbrFlights,1) OVER(PARTITION BY State ORDER BY Year) as prev_NbrFlights 
+	FROM arrStateFlightTable
+)a
+WHERE prev_NbrFlights IS NOT NULL
+ORDER BY 4 DESC

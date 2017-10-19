@@ -1,0 +1,6 @@
+# Join dataframe to get the description of the cancellation
+flightCancel\
+.join(flightCancelRef,flightCancel.CANCELLATION_CODE == flightCancelRef.Code)\
+.select("Description",col("count"))\
+.orderBy("count",ascending=False)\
+.show()

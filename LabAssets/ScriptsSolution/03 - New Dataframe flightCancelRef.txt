@@ -1,0 +1,10 @@
+# new DF from RefAnnulations.csv
+
+# Define dataset azure path
+flightCancelRefPath ="wasb://sparklabdata@sparkstorage01.blob.core.windows.net/References/RefAnnulations.csv"
+
+# Obtain dataframe
+flightCancelRef = spark.read.format("com.databricks.spark.csv").options(header='true').load(flightCancelRefPath)
+
+# Look at the schema:
+flightCancelRef.printSchema()
